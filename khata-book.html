@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>Verka</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#22303F">
+<meta name="background-color" content="#FBF4E4">
+
+<!-- iOS home-screen app behaviour -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Verka">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<!-- Android / general -->
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBF4E4;
+    --paper-line:#E3D5B8;
+    --margin:#A63A24;
+    --ink:#22303F;
+    --ink-soft:#5B6B78;
+    --udhaar:#A63A24;
+    --jama:#1F6F4A;
+    --gold:#C98A2E;
+    --card:#FFFDF8;
+    --shadow: 0 2px 10px rgba(34,48,63,0.08);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(var(--paper) 0px, var(--paper) 27px, var(--paper-line) 28px),
+      var(--paper);
+    font-family:'Inter',system-ui,sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    padding-bottom:40px;
+  }
+  .frame{
+    max-width:480px;
+    margin:0 auto;
+    padding:0 16px;
+    position:relative;
+  }
+  .frame::before{
+    content:"";
+    position:fixed;
+    top:0; bottom:0;
+    left:calc(50% - 240px + 46px);
+    width:2px;
+    background:var(--margin);
+    opacity:0.35;
+    max-width:calc(100% - 92px);
+  }
+  @media (max-width:480px){
+    .frame::before{ left:46px; }
+  }
+  header{
+    padding:22px 0 10px;
+    text-align:center;
+  }
+  header h1{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:26px;
+    margin:0;
+    letter-spacing:0.2px;
+  }
+  header .sub{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-top:4px;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .partytabs{
+    display:flex;
+    gap:8px;
+    margin:14px 0 16px;
+  }
+  .partytab{
+    flex:1;
+    padding:12px 8px;
+    border-radius:12px;
+    border:1.5px solid var(--paper-line);
+    background:var(--card);
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:15px;
+    text-align:center;
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .partytab.active{
+    border-color:var(--margin);
+    background:var(--margin);
+    color:#fff;
+    box-shadow:var(--shadow);
+  }
+  .card{
+    background:var(--card);
+    border-radius:14px;
+    padding:16px;
+    box-shadow:var(--shadow);
+    margin-bottom:14px;
+    border:1px solid var(--paper-line);
+  }
+  .balance-label{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:1.2px;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+  .balance-value{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:34px;
+    color:var(--udhaar);
+    margin:4px 0 10px;
+  }
+  .balance-value.zero{ color:var(--jama); }
+  .mini-stats{
+    display:flex;
+    gap:10px;
+    font-size:12px;
+  }
+  .mini-stats div{
+    flex:1;
+    background:var(--paper);
+    border-radius:8px;
+    padding:8px 8px;
+    text-align:center;
+  }
+  .mini-stats .lbl{ color:var(--ink-soft); display:block; margin-bottom:2px;}
+  .mini-stats .val{ font-family:'IBM Plex Mono',monospace; font-weight:600; }
+  .share-btn{
+    margin-top:12px;
+    width:100%;
+    padding:11px;
+    border-radius:10px;
+    border:none;
+    background:#25D366;
+    color:#fff;
+    font-weight:600;
+    font-size:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    cursor:pointer;
+  }
+  .share-btn:active{ opacity:0.85; }
+
+  .segmented{
+    display:flex;
+    background:var(--paper);
+    border-radius:10px;
+    padding:3px;
+    margin-bottom:12px;
+  }
+  .segmented button{
+    flex:1;
+    border:none;
+    background:transparent;
+    padding:10px 6px;
+    border-radius:8px;
+    font-weight:600;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+  .segmented button.active.udhaar{ background:var(--udhaar); color:#fff; }
+  .segmented button.active.jama{ background:var(--jama); color:#fff; }
+
+  label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    color:var(--ink-soft);
+    margin:10px 0 4px;
+  }
+  select,input{
+    width:100%;
+    padding:11px 10px;
+    border-radius:9px;
+    border:1.5px solid var(--paper-line);
+    background:#fff;
+    font-size:15px;
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+  }
+  select:focus,input:focus{ outline:2px solid var(--gold); outline-offset:1px; }
+  .row2{ display:flex; gap:10px; }
+  .row2 > div{ flex:1; }
+  .amount-preview{
+    margin-top:12px;
+    background:var(--paper);
+    border-radius:9px;
+    padding:10px 12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .amount-preview .amt{ font-size:19px; font-weight:600; }
+  .submit-btn{
+    width:100%;
+    margin-top:16px;
+    padding:14px;
+    border:none;
+    border-radius:11px;
+    background:var(--ink);
+    color:#fff;
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:16px;
+    cursor:pointer;
+  }
+  .submit-btn:active{ transform:scale(0.99); }
+  .toast{
+    position:fixed;
+    left:50%; bottom:24px;
+    transform:translateX(-50%);
+    background:var(--ink);
+    color:#fff;
+    padding:11px 18px;
+    border-radius:30px;
+    font-size:13.5px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.25);
+    display:none;
+    z-index:50;
+    max-width:90%;
+    text-align:center;
+  }
+  .ledger-title{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:16px;
+    margin:18px 0 8px 2px;
+  }
+  .entry{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:11px 4px;
+    border-bottom:1px dashed var(--paper-line);
+  }
+  .entry:last-child{ border-bottom:none; }
+  .entry .desc{ font-size:13.5px; }
+  .entry .desc .d{ color:var(--ink-soft); font-size:11.5px; font-family:'IBM Plex Mono',monospace; display:block; }
+  .entry .amt{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:14.5px; text-align:right; }
+  .entry .amt.udhaar{ color:var(--udhaar); }
+  .entry .amt.jama{ color:var(--jama); }
+  .entry .bal{ font-size:10.5px; color:var(--ink-soft); display:block; text-align:right; }
+  .empty{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:13px;
+    padding:22px 0;
+  }
+  .settings-toggle{
+    text-align:center;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:6px;
+    text-decoration:underline;
+    cursor:pointer;
+  }
+  .phone-row{ display:flex; gap:8px; align-items:center; }
+  .phone-row input{ flex:1; }
+  .phone-row button{
+    border:none; background:var(--jama); color:#fff; border-radius:8px;
+    padding:11px 14px; font-weight:600; font-size:13px; cursor:pointer;
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+  <header>
+    <h1>Verka</h1>
+    <div class="sub" id="todayLabel">—</div>
+  </header>
+
+  <div id="storageBanner" style="display:none; background:#FDECEA; border:1.5px solid var(--udhaar); color:var(--udhaar); border-radius:10px; padding:10px 12px; font-size:12px; margin-bottom:12px;">
+    <div id="storageBannerText"></div>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button id="storageRetryBtn" style="flex:1; border:none; background:var(--udhaar); color:#fff; border-radius:7px; padding:7px; font-size:11.5px; font-weight:600; cursor:pointer;">Try again</button>
+      <button id="storageDismissBtn" style="flex:1; border:1px solid var(--udhaar); background:transparent; color:var(--udhaar); border-radius:7px; padding:7px; font-size:11.5px; font-weight:600; cursor:pointer;">Dismiss</button>
+    </div>
+  </div>
+
+  <button id="dashboardBtn" style="width:100%; padding:10px; border-radius:10px; border:1.5px dashed var(--margin); background:transparent; color:var(--margin); font-weight:600; font-size:13px; margin-bottom:8px; cursor:pointer;">📊 View Today's Dashboard</button>
+  <button id="dateWiseBtn" style="width:100%; padding:10px; border-radius:10px; border:1.5px dashed var(--jama); background:transparent; color:var(--jama); font-weight:600; font-size:13px; margin-bottom:12px; cursor:pointer;">📅 Date-wise Ledger</button>
+
+  <div class="partytabs" id="partyTabs"></div>
+
+  <div class="card">
+    <div class="balance-label">Baaki (Balance Due)</div>
+    <div class="balance-value" id="balanceValue">₹0</div>
+    <div id="openingBalanceNote" style="font-size:11px; color:var(--ink-soft); margin:-6px 0 8px; display:none;"></div>
+    <div class="mini-stats">
+      <div><span class="lbl">Udhaar</span><span class="val" id="statUdhaar">₹0</span></div>
+      <div><span class="lbl">Cash</span><span class="val" id="statCash">₹0</span></div>
+      <div><span class="lbl">UPI</span><span class="val" id="statUpi">₹0</span></div>
+    </div>
+    <button class="share-btn" id="shareBalanceBtn">📲 Share Baaki on WhatsApp</button>
+    <button class="share-btn" id="exportBtn" style="background:var(--ink);">⬇️ Export to Excel</button>
+    <div class="settings-toggle" id="settingsToggle">+ settings (phone number, previous balance)</div>
+    <div id="phoneSettings" style="display:none; margin-top:10px;">
+      <label>WhatsApp number (with country code, digits only)</label>
+      <input type="tel" id="phoneInput" placeholder="e.g. 919876543210">
+      <label>Previous Balance (owed before you started using Verka)</label>
+      <input type="number" id="openingBalanceInput" placeholder="₹0" min="0">
+      <div class="phone-row" style="margin-top:8px;">
+        <button id="phoneSaveBtn" style="flex:1;">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="segmented" id="typeSeg">
+      <button class="active udhaar" data-type="Purchase">Udhaar (Purchase)</button>
+      <button class="jama" data-type="Payment">Jama (Payment)</button>
+    </div>
+
+    <div id="purchaseFields">
+      <div class="row2">
+        <div>
+          <label>Product</label>
+          <select id="productSelect">
+            <option value="Full Cream">Full Cream — ₹792</option>
+            <option value="Cow Milk">Cow Milk — ₹696</option>
+          </select>
+        </div>
+        <div>
+          <label>Quantity</label>
+          <input type="number" id="qtyInput" value="1" min="1" step="1">
+        </div>
+      </div>
+    </div>
+
+    <div id="paymentFields" style="display:none;">
+      <label>Amount Received</label>
+      <input type="number" id="paymentAmount" placeholder="₹ amount" min="1">
+      <label>Mode</label>
+      <div class="segmented">
+        <button class="mode-btn active jama" data-mode="Cash">Cash</button>
+        <button class="mode-btn jama" data-mode="UPI">UPI</button>
+      </div>
+    </div>
+
+    <label>Date</label>
+    <input type="date" id="dateInput">
+
+    <div class="amount-preview" id="amountPreview">
+      <span>Amount</span>
+      <span class="amt" id="previewAmt">₹0</span>
+    </div>
+
+    <button class="submit-btn" id="submitBtn">Add to Khata</button>
+  </div>
+
+  <div class="ledger-title" id="ledgerTitle">Ledger</div>
+  <div class="card" id="ledgerCard">
+    <div id="ledgerList"></div>
+  </div>
+</div>
+
+<div id="dashboardOverlay" style="display:none; position:fixed; inset:0; background:rgba(34,48,63,0.55); z-index:60; overflow-y:auto;">
+  <div style="max-width:480px; margin:0 auto; padding:16px;">
+    <div class="card" style="margin-top:20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div class="ledger-title" style="margin:0;" id="dashDate">Today</div>
+        <button id="dashCloseBtn" style="border:none; background:var(--paper); border-radius:8px; padding:6px 11px; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div class="mini-stats" style="margin-bottom:10px;">
+        <div><span class="lbl">Udhaar Today</span><span class="val" id="dashUdhaar">₹0</span></div>
+        <div><span class="lbl">Cash Today</span><span class="val" id="dashCash">₹0</span></div>
+        <div><span class="lbl">UPI Today</span><span class="val" id="dashUpi">₹0</span></div>
+      </div>
+
+      <div class="balance-label">Total Collected Today</div>
+      <div class="balance-value zero" id="dashCollected">₹0</div>
+
+      <div class="balance-label">Today's Profit</div>
+      <div class="balance-value zero" id="dashProfit">₹0</div>
+      <div id="dashProfitBreakup" style="font-size:12px; color:var(--ink-soft); margin:-6px 0 8px;"></div>
+
+      <div class="ledger-title" style="font-size:14px; margin-top:16px;">Closing Balance — Each Party</div>
+      <table id="closingTable" style="width:100%; border-collapse:collapse; font-size:12.5px; margin-top:6px;">
+        <thead>
+          <tr style="border-bottom:1.5px solid var(--paper-line);">
+            <th style="text-align:left; padding:6px 4px; color:var(--ink-soft); font-weight:600;">Party</th>
+            <th style="text-align:right; padding:6px 4px; color:var(--ink-soft); font-weight:600;">Opening</th>
+            <th style="text-align:right; padding:6px 4px; color:var(--ink-soft); font-weight:600;">Udhaar</th>
+            <th style="text-align:right; padding:6px 4px; color:var(--ink-soft); font-weight:600;">Received</th>
+            <th style="text-align:right; padding:6px 4px; color:var(--ink-soft); font-weight:600;">Closing</th>
+          </tr>
+        </thead>
+        <tbody id="closingTableBody"></tbody>
+      </table>
+
+      <div class="balance-label" style="margin-top:14px;">Total Outstanding (All Parties)</div>
+      <div class="balance-value" id="dashOutstanding">₹0</div>
+
+      <button class="share-btn" id="shareClosingBtn" style="background:#25D366;">📲 Share Closing Balance</button>
+
+      <div class="ledger-title" style="font-size:14px; margin-top:16px;">Today's Entries</div>
+      <div id="dashEntries"></div>
+    </div>
+  </div>
+</div>
+
+<div id="dateOverlay" style="display:none; position:fixed; inset:0; background:rgba(34,48,63,0.55); z-index:60; overflow-y:auto;">
+  <div style="max-width:480px; margin:0 auto; padding:16px;">
+    <div class="card" style="margin-top:20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div class="ledger-title" style="margin:0;" id="dateOverlayTitle">Date-wise Ledger</div>
+        <button id="dateCloseBtn" style="border:none; background:var(--paper); border-radius:8px; padding:6px 11px; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+      <div id="dateGroupList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+const PRODUCTS = { "Full Cream": 792, "Cow Milk": 696 };
+const COST_PRICES = { "Full Cream": 744, "Cow Milk": 660 };
+const DEFAULT_META = {
+  parties: [
+    { id:"p1", name:"Mithas", phone:"", openingBalance:0 },
+    { id:"p2", name:"Banke Bihari", phone:"", openingBalance:0 }
+  ]
+};
+
+let meta = null;
+let entries = [];
+let activePartyId = "p1";
+let activeType = "Purchase";
+let activeMode = "Cash";
+
+let storageOK = true;
+
+function showStorageBanner(msg){
+  document.getElementById('storageBannerText').textContent = msg;
+  document.getElementById('storageBanner').style.display = 'block';
+}
+function hideStorageBanner(){
+  document.getElementById('storageBanner').style.display = 'none';
+}
+function testStorage(){
+  try{
+    localStorage.setItem('verka-test', '1');
+    localStorage.removeItem('verka-test');
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+function lsGet(key){
+  const v = localStorage.getItem(key);
+  if(v === null) throw new Error('not found');
+  return v;
+}
+function lsSet(key, value){
+  localStorage.setItem(key, value);
+}
+
+async function loadData(){
+  if(typeof localStorage === 'undefined'){
+    storageOK = false;
+    meta = DEFAULT_META;
+    entries = [];
+    showStorageBanner('⚠️ This browser is blocking offline storage (e.g. private/incognito mode). Entries will only last this session.');
+    return;
+  }
+
+  try{
+    meta = JSON.parse(lsGet('verka-meta'));
+  }catch(e){
+    // one-time migration attempt from the earlier cloud-storage version, if available
+    try{
+      const old = await window.storage.get('verka-meta', false);
+      meta = JSON.parse(old.value);
+    }catch(e2){
+      meta = DEFAULT_META;
+    }
+    try{ lsSet('verka-meta', JSON.stringify(meta)); }catch(e3){ storageOK = false; }
+  }
+
+  try{
+    entries = JSON.parse(lsGet('verka-entries'));
+  }catch(e){
+    try{
+      const old = await window.storage.get('verka-entries', false);
+      entries = JSON.parse(old.value);
+    }catch(e2){
+      entries = [];
+    }
+    try{ lsSet('verka-entries', JSON.stringify(entries)); }catch(e3){ storageOK = false; }
+  }
+
+  if(!storageOK){
+    showStorageBanner('⚠️ Could not save offline on this device. Entries will only last this session.');
+  }
+}
+
+async function saveMeta(){
+  lsSet('verka-meta', JSON.stringify(meta));
+}
+async function saveEntries(){
+  lsSet('verka-entries', JSON.stringify(entries));
+}
+
+function fmt(n){
+  return "₹" + Math.round(n).toLocaleString('en-IN');
+}
+
+function partyById(id){ return meta.parties.find(p=>p.id===id); }
+
+function renderPartyTabs(){
+  const wrap = document.getElementById('partyTabs');
+  wrap.innerHTML = "";
+  meta.parties.forEach(p=>{
+    const btn = document.createElement('div');
+    btn.className = 'partytab' + (p.id===activePartyId ? ' active':'');
+    btn.textContent = p.name;
+    btn.onclick = ()=>{ activePartyId = p.id; renderAll(); };
+    wrap.appendChild(btn);
+  });
+}
+
+function computeTotals(partyId){
+  let udhaar=0, cash=0, upi=0;
+  entries.filter(e=>e.partyId===partyId).forEach(e=>{
+    if(e.type==='Purchase') udhaar += e.amount;
+    else if(e.type==='Payment'){ if(e.mode==='Cash') cash += e.amount; else upi += e.amount; }
+  });
+  const opening = partyById(partyId).openingBalance || 0;
+  return { udhaar, cash, upi, opening, baaki: opening + udhaar - cash - upi };
+}
+
+function renderBalance(){
+  const t = computeTotals(activePartyId);
+  const bv = document.getElementById('balanceValue');
+  bv.textContent = fmt(t.baaki);
+  bv.className = 'balance-value' + (t.baaki<=0 ? ' zero':'');
+  document.getElementById('statUdhaar').textContent = fmt(t.udhaar);
+  document.getElementById('statCash').textContent = fmt(t.cash);
+  document.getElementById('statUpi').textContent = fmt(t.upi);
+  const note = document.getElementById('openingBalanceNote');
+  if(t.opening && t.opening !== 0){
+    note.style.display = 'block';
+    note.textContent = 'Includes previous balance of ' + fmt(t.opening);
+  } else {
+    note.style.display = 'none';
+  }
+}
+
+function renderLedger(){
+  const party = partyById(activePartyId);
+  const list = entries.filter(e=>e.partyId===activePartyId).sort((a,b)=> new Date(a.date) - new Date(b.date) || a.ts - b.ts);
+  document.getElementById('ledgerTitle').textContent = party.name + "'s Ledger (" + list.length + (list.length===1 ? ' entry saved' : ' entries saved') + ")";
+  let running = party.openingBalance || 0;
+  const rows = list.map(e=>{
+    if(e.type==='Purchase') running += e.amount; else running -= e.amount;
+    return { ...e, running };
+  }).reverse();
+
+  const wrap = document.getElementById('ledgerList');
+  if(rows.length===0){
+    wrap.innerHTML = '<div class="empty">No entries yet. Add the first bill above.</div>';
+    return;
+  }
+  wrap.innerHTML = rows.map(r=>{
+    const desc = r.type==='Purchase'
+      ? `${r.product} × ${r.qty}`
+      : `Payment received (${r.mode})`;
+    const cls = r.type==='Purchase' ? 'udhaar' : 'jama';
+    const sign = r.type==='Purchase' ? '+' : '−';
+    return `<div class="entry">
+      <div class="desc">${desc}<span class="d">${niceDate(r.date)}</span></div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div>
+          <div class="amt ${cls}">${sign}${fmt(r.amount)}</div>
+          <span class="bal">Baaki: ${fmt(r.running)}</span>
+        </div>
+        <button onclick="deleteEntry('${r.id}')" style="border:none; background:transparent; color:var(--ink-soft); font-size:16px; cursor:pointer; padding:2px 4px;">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function niceDate(iso){
+  const d = new Date(iso+"T00:00:00");
+  return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function renderPreview(){
+  let amt = 0;
+  if(activeType==='Purchase'){
+    const product = document.getElementById('productSelect').value;
+    const qty = parseFloat(document.getElementById('qtyInput').value) || 0;
+    amt = PRODUCTS[product] * qty;
+  } else {
+    amt = parseFloat(document.getElementById('paymentAmount').value) || 0;
+  }
+  document.getElementById('previewAmt').textContent = fmt(amt);
+}
+
+function renderAll(){
+  renderPartyTabs();
+  renderBalance();
+  renderLedger();
+  renderPreview();
+  const party = partyById(activePartyId);
+  document.getElementById('phoneInput').value = party.phone || "";
+  document.getElementById('openingBalanceInput').value = party.openingBalance || "";
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(()=>{ t.style.display='none'; }, 2600);
+}
+
+function waLink(phone, text){
+  const encoded = encodeURIComponent(text);
+  if(phone && phone.trim().length>0){
+    return `https://wa.me/${phone.trim()}?text=${encoded}`;
+  }
+  return `https://wa.me/?text=${encoded}`;
+}
+
+function billMessage(entry, party){
+  const t = computeTotals(party.id);
+  const desc = entry.type==='Purchase'
+    ? `${entry.product} x ${entry.qty} = ${fmt(entry.amount)} (Purchase)`
+    : `Payment received: ${fmt(entry.amount)} (${entry.mode})`;
+  const prevLine = t.opening ? `Previous Balance: ${fmt(t.opening)}\n` : '';
+  return `🥛 *${party.name} — Daily Bill*\n` +
+         `Date: ${niceDate(entry.date)}\n\n` +
+         `${prevLine}${desc}\n\n` +
+         `*Baaki (Balance Due): ${fmt(t.baaki)}*\n\n` +
+         `— Sent via Verka`;
+}
+
+function balanceMessage(party){
+  const t = computeTotals(party.id);
+  const prevLine = t.opening ? `Previous Balance: ${fmt(t.opening)}\n` : '';
+  return `🥛 *${party.name} — Balance Update*\n` +
+         `${prevLine}Total Purchase: ${fmt(t.udhaar)}\n` +
+         `Received (Cash): ${fmt(t.cash)}\n` +
+         `Received (UPI): ${fmt(t.upi)}\n\n` +
+         `*Baaki (Balance Due): ${fmt(t.baaki)}*\n\n` +
+         `— Sent via Verka`;
+}
+
+// ---------- events ----------
+document.getElementById('typeSeg').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  activeType = btn.dataset.type;
+  document.querySelectorAll('#typeSeg button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('purchaseFields').style.display = activeType==='Purchase' ? '' : 'none';
+  document.getElementById('paymentFields').style.display = activeType==='Payment' ? '' : 'none';
+  renderPreview();
+});
+
+document.querySelectorAll('.mode-btn').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    activeMode = b.dataset.mode;
+    document.querySelectorAll('.mode-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+  });
+});
+
+document.getElementById('productSelect').addEventListener('change', renderPreview);
+document.getElementById('qtyInput').addEventListener('input', renderPreview);
+document.getElementById('paymentAmount').addEventListener('input', renderPreview);
+
+document.getElementById('settingsToggle').addEventListener('click', ()=>{
+  const el = document.getElementById('phoneSettings');
+  el.style.display = el.style.display==='none' ? 'block' : 'none';
+});
+
+document.getElementById('phoneSaveBtn').addEventListener('click', async ()=>{
+  const phoneVal = document.getElementById('phoneInput').value.replace(/[^0-9]/g,'');
+  const openingVal = parseFloat(document.getElementById('openingBalanceInput').value) || 0;
+  const party = partyById(activePartyId);
+  party.phone = phoneVal;
+  party.openingBalance = openingVal;
+  try{
+    await saveMeta();
+    showToast('Settings saved ✅');
+    renderBalance();
+  }catch(e){ showToast('Could not save — try again'); }
+});
+
+document.getElementById('submitBtn').addEventListener('click', async ()=>{
+  const date = document.getElementById('dateInput').value || new Date().toISOString().slice(0,10);
+  let entry;
+  if(activeType==='Purchase'){
+    const product = document.getElementById('productSelect').value;
+    const qty = parseFloat(document.getElementById('qtyInput').value);
+    if(!qty || qty<=0){ showToast('Enter a valid quantity'); return; }
+    entry = {
+      id: 'e'+Date.now(), ts: Date.now(), partyId: activePartyId, date,
+      type:'Purchase', product, qty, price: PRODUCTS[product], amount: PRODUCTS[product]*qty
+    };
+  } else {
+    const amt = parseFloat(document.getElementById('paymentAmount').value);
+    if(!amt || amt<=0){ showToast('Enter a valid amount'); return; }
+    entry = {
+      id:'e'+Date.now(), ts: Date.now(), partyId: activePartyId, date,
+      type:'Payment', amount: amt, mode: activeMode
+    };
+  }
+
+  entries.push(entry);
+  if(storageOK){
+    try{
+      await saveEntries();
+      hideStorageBanner();
+    }catch(e){
+      showToast('⚠️ Added, but could not save permanently. Check your connection.');
+      showStorageBanner('⚠️ Last entry may not be saved for next time. Reload and re-check before adding more.');
+    }
+  }
+
+  renderAll();
+  if(activeType==='Purchase'){ document.getElementById('qtyInput').value = 1; }
+  else{ document.getElementById('paymentAmount').value = ''; }
+
+  const party = partyById(activePartyId);
+  if(storageOK){
+    showToast('Saved to ' + party.name + "'s khata ✅");
+  }
+
+  // offer a quick share for this bill via a temporary link on the toast area is limited,
+  // so we open share directly through the balance-share button state:
+  window._lastEntryForShare = entry;
+});
+
+document.getElementById('shareBalanceBtn').addEventListener('click', ()=>{
+  const party = partyById(activePartyId);
+  const msg = window._lastEntryForShare && window._lastEntryForShare.partyId===activePartyId
+    ? billMessage(window._lastEntryForShare, party)
+    : balanceMessage(party);
+  window.open(waLink(party.phone, msg), '_blank');
+});
+
+async function deleteEntry(id){
+  const idx = entries.findIndex(e=>e.id===id);
+  if(idx===-1) return;
+  const e = entries[idx];
+  const party = partyById(e.partyId);
+  const desc = e.type==='Purchase' ? `${e.product} × ${e.qty} (${fmt(e.amount)})` : `Payment ${fmt(e.amount)} (${e.mode})`;
+  if(!confirm(`Delete this entry?\n\n${party.name}: ${desc}\n\nThis cannot be undone.`)) return;
+
+  const removed = entries.splice(idx, 1)[0];
+  if(storageOK){
+    try{
+      await saveEntries();
+    }catch(err){
+      entries.splice(idx, 0, removed);
+      showToast('⚠️ Could not delete — try again.');
+      return;
+    }
+  }
+  renderAll();
+  if(document.getElementById('dashboardOverlay').style.display === 'block'){
+    renderDashboard();
+  }
+  if(document.getElementById('dateOverlay').style.display === 'block'){
+    renderDateWise();
+  }
+  showToast('Entry deleted 🗑️');
+}
+window.deleteEntry = deleteEntry;
+
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+
+function profitFor(entry){
+  if(entry.type!=='Purchase') return 0;
+  const cost = COST_PRICES[entry.product];
+  if(cost===undefined) return 0;
+  return (entry.price - cost) * entry.qty;
+}
+
+function renderDashboard(){
+  const today = todayISO();
+  document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-IN', { weekday:'long', day:'2-digit', month:'short', year:'numeric' });
+
+  const todayEntries = entries.filter(e=>e.date===today).sort((a,b)=>a.ts-b.ts);
+  let udhaar=0, cash=0, upi=0;
+  const profitByProduct = {};
+  todayEntries.forEach(e=>{
+    if(e.type==='Purchase'){
+      udhaar += e.amount;
+      const p = profitFor(e);
+      profitByProduct[e.product] = (profitByProduct[e.product] || 0) + p;
+    }
+    else if(e.mode==='Cash') cash += e.amount; else if(e.mode==='UPI') upi += e.amount;
+  });
+  document.getElementById('dashUdhaar').textContent = fmt(udhaar);
+  document.getElementById('dashCash').textContent = fmt(cash);
+  document.getElementById('dashUpi').textContent = fmt(upi);
+  document.getElementById('dashCollected').textContent = fmt(cash+upi);
+
+  const totalProfit = Object.values(profitByProduct).reduce((a,b)=>a+b, 0);
+  document.getElementById('dashProfit').textContent = fmt(totalProfit);
+  const profitLines = Object.keys(profitByProduct).map(prod=>`${prod}: ${fmt(profitByProduct[prod])}`).join(' · ');
+  document.getElementById('dashProfitBreakup').textContent = profitLines || 'No sales yet today';
+
+  let totalOutstanding = 0;
+  const closingData = meta.parties.map(p=>{
+    const beforeToday = entries.filter(e=>e.partyId===p.id && e.date < today);
+    let openingUdhaar=0, openingReceived=0;
+    beforeToday.forEach(e=>{
+      if(e.type==='Purchase') openingUdhaar += e.amount;
+      else openingReceived += e.amount;
+    });
+    const opening = (p.openingBalance||0) + openingUdhaar - openingReceived;
+
+    const todayFor = entries.filter(e=>e.partyId===p.id && e.date===today);
+    let tUdhaar=0, tReceived=0;
+    todayFor.forEach(e=>{
+      if(e.type==='Purchase') tUdhaar += e.amount; else tReceived += e.amount;
+    });
+    const closing = opening + tUdhaar - tReceived;
+    totalOutstanding += closing;
+    return { name: p.name, opening, tUdhaar, tReceived, closing };
+  });
+
+  document.getElementById('closingTableBody').innerHTML = closingData.map(d=>`
+    <tr style="border-bottom:1px dashed var(--paper-line);">
+      <td style="padding:7px 4px; font-weight:600;">${d.name}</td>
+      <td style="padding:7px 4px; text-align:right; font-family:'IBM Plex Mono',monospace;">${fmt(d.opening)}</td>
+      <td style="padding:7px 4px; text-align:right; font-family:'IBM Plex Mono',monospace; color:var(--udhaar);">${fmt(d.tUdhaar)}</td>
+      <td style="padding:7px 4px; text-align:right; font-family:'IBM Plex Mono',monospace; color:var(--jama);">${fmt(d.tReceived)}</td>
+      <td style="padding:7px 4px; text-align:right; font-family:'IBM Plex Mono',monospace; font-weight:700;">${fmt(d.closing)}</td>
+    </tr>`).join('');
+  document.getElementById('dashOutstanding').textContent = fmt(totalOutstanding);
+  window._lastClosingData = closingData;
+
+  const listEl = document.getElementById('dashEntries');
+  if(todayEntries.length===0){
+    listEl.innerHTML = '<div class="empty">No entries yet today.</div>';
+  } else {
+    listEl.innerHTML = todayEntries.map(e=>{
+      const party = partyById(e.partyId);
+      const desc = e.type==='Purchase' ? `${party.name}: ${e.product} × ${e.qty}` : `${party.name}: Payment (${e.mode})`;
+      const cls = e.type==='Purchase' ? 'udhaar' : 'jama';
+      const sign = e.type==='Purchase' ? '+' : '−';
+      return `<div class="entry"><div class="desc">${desc}</div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="amt ${cls}">${sign}${fmt(e.amount)}</div>
+          <button onclick="deleteEntry('${e.id}')" style="border:none; background:transparent; color:var(--ink-soft); font-size:15px; cursor:pointer; padding:2px 4px;">🗑️</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function renderDateWise(){
+  const party = partyById(activePartyId);
+  document.getElementById('dateOverlayTitle').textContent = party.name + "'s Ledger by Date";
+
+  const list = entries.filter(e=>e.partyId===activePartyId).sort((a,b)=> new Date(a.date) - new Date(b.date) || a.ts - b.ts);
+  const wrap = document.getElementById('dateGroupList');
+  if(list.length===0){
+    wrap.innerHTML = '<div class="empty">No entries yet for ' + party.name + '.</div>';
+    return;
+  }
+
+  // running closing balance as we walk forward chronologically
+  let running = party.openingBalance || 0;
+  const byDate = {}; // date -> { entries:[], closing: number }
+  list.forEach(e=>{
+    if(e.type==='Purchase') running += e.amount; else running -= e.amount;
+    if(!byDate[e.date]) byDate[e.date] = { entries: [], closing: 0 };
+    byDate[e.date].entries.push(e);
+    byDate[e.date].closing = running; // closing balance as of end of this date
+  });
+
+  const dates = Object.keys(byDate).sort((a,b)=> new Date(b) - new Date(a)); // newest first
+  wrap.innerHTML = dates.map(d=>{
+    const g = byDate[d];
+    const safeId = 'dg-' + d;
+    const entryRows = g.entries.map(e=>{
+      const desc = e.type==='Purchase' ? `${e.product} × ${e.qty}` : `Payment (${e.mode})`;
+      const cls = e.type==='Purchase' ? 'udhaar' : 'jama';
+      const sign = e.type==='Purchase' ? '+' : '−';
+      return `<div class="entry">
+        <div class="desc">${desc}</div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="amt ${cls}">${sign}${fmt(e.amount)}</div>
+          <button onclick="deleteEntry('${e.id}')" style="border:none; background:transparent; color:var(--ink-soft); font-size:15px; cursor:pointer; padding:2px 4px;">🗑️</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div style="border-bottom:1px solid var(--paper-line);">
+      <div onclick="toggleDateGroup('${safeId}')" style="display:flex; justify-content:space-between; align-items:center; padding:12px 4px; cursor:pointer;">
+        <span style="font-weight:600; font-size:14px;">${niceDate(d)}</span>
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600;">Closing: ${fmt(g.closing)} ▾</span>
+      </div>
+      <div id="${safeId}" style="display:none; padding:0 4px 8px;">${entryRows}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleDateGroup(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+window.toggleDateGroup = toggleDateGroup;
+
+document.getElementById('dateWiseBtn').addEventListener('click', ()=>{
+  renderDateWise();
+  document.getElementById('dateOverlay').style.display = 'block';
+});
+document.getElementById('dateCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('dateOverlay').style.display = 'none';
+});
+
+document.getElementById('dashboardBtn').addEventListener('click', ()=>{
+  renderDashboard();
+  document.getElementById('dashboardOverlay').style.display = 'block';
+});
+document.getElementById('dashCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('dashboardOverlay').style.display = 'none';
+});
+
+document.getElementById('shareClosingBtn').addEventListener('click', ()=>{
+  const data = window._lastClosingData || [];
+  const dateStr = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+  let lines = data.map(d => `*${d.name}*\nOpening: ${fmt(d.opening)} | Purchase: ${fmt(d.tUdhaar)} | Received: ${fmt(d.tReceived)}\n*Closing: ${fmt(d.closing)}*`).join('\n\n');
+  const total = data.reduce((a,d)=>a+d.closing,0);
+  const msg = `🥛 *Verka — Daily Closing Balance*\nDate: ${dateStr}\n\n${lines}\n\n*Total Outstanding: ${fmt(total)}*\n\n— Sent via Verka`;
+  window.open(waLink('', msg), '_blank');
+});
+
+document.getElementById('storageDismissBtn').addEventListener('click', hideStorageBanner);
+document.getElementById('storageRetryBtn').addEventListener('click', async ()=>{
+  if(testStorage()){
+    storageOK = true;
+    hideStorageBanner();
+    try{ await saveMeta(); await saveEntries(); }catch(e){}
+    showToast('Offline saving is working now ✅');
+  } else {
+    showToast('Still blocked — try opening this page directly in your browser, not inside another app\'s preview.');
+  }
+});
+
+function exportToExcel(){
+  if(typeof XLSX === 'undefined'){
+    showToast('Export needs an internet connection the first time — try again when online.');
+    return;
+  }
+  const wb = XLSX.utils.book_new();
+  meta.parties.forEach(p=>{
+    const list = entries.filter(e=>e.partyId===p.id).sort((a,b)=> new Date(a.date)-new Date(b.date) || a.ts-b.ts);
+    let running = p.openingBalance || 0;
+    const rows = [];
+    if(p.openingBalance){
+      rows.push({ Date:'', Type:'Opening Balance', Product:'', Quantity:'', Price:'', 'Purchase Amount (Debit)':'', 'Payment Amount (Credit)':'', Mode:'', 'Running Balance': p.openingBalance });
+    }
+    list.forEach(e=>{
+      if(e.type==='Purchase') running += e.amount; else running -= e.amount;
+      rows.push({
+        Date: niceDate(e.date),
+        Type: e.type,
+        Product: e.product || '',
+        Quantity: e.qty || '',
+        Price: e.price || '',
+        'Purchase Amount (Debit)': e.type==='Purchase' ? e.amount : '',
+        'Payment Amount (Credit)': e.type==='Payment' ? e.amount : '',
+        Mode: e.mode || '',
+        'Running Balance': running
+      });
+    });
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [{wch:12},{wch:11},{wch:13},{wch:9},{wch:8},{wch:16},{wch:16},{wch:8},{wch:14}];
+    XLSX.utils.book_append_sheet(wb, ws, p.name.slice(0,31));
+  });
+  const summaryRows = meta.parties.map(p=>{
+    const t = computeTotals(p.id);
+    return { Party: p.name, 'Previous Balance': t.opening, 'Total Udhaar': t.udhaar, 'Cash Received': t.cash, 'UPI Received': t.upi, 'Outstanding Balance': t.baaki };
+  });
+  const wsSummary = XLSX.utils.json_to_sheet(summaryRows);
+  wsSummary['!cols'] = [{wch:16},{wch:15},{wch:14},{wch:13},{wch:13},{wch:17}];
+  XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
+  XLSX.writeFile(wb, 'Verka_Ledger_' + todayISO() + '.xlsx');
+}
+document.getElementById('exportBtn').addEventListener('click', exportToExcel);
+
+// ---------- init ----------
+(async function init(){
+  document.getElementById('dateInput').value = new Date().toISOString().slice(0,10);
+  document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('en-IN', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+  await loadData();
+  renderAll();
+
+  // Register service worker only when served over http(s) — it silently fails on file:// which is fine.
+  if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+    try{
+      await navigator.serviceWorker.register('service-worker.js');
+    }catch(e){ /* offline caching just won't be available — app still works */ }
+  }
+})();
+</script>
+</body>
+</html>
