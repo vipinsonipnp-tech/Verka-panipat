@@ -2,7 +2,7 @@
   "name": "Verka — Khata Book",
   "short_name": "Verka",
   "description": "Daily billing and credit ledger for Mithas and Banke Bihari",
-  "start_url": "./khata-book.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
