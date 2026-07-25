@@ -2,8 +2,6 @@ const CACHE_NAME = 'shriram-dairy-cache-v2';
 const ASSETS = [
   './index.html',
   './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
