@@ -301,6 +301,7 @@
     background:rgba(34,48,63,0.55); z-index:60; overflow-y:auto;
   }
   .overlay.top{ z-index:70; }
+  .overlay.stacked{ z-index:80; }
   .overlay-inner{ max-width:480px; margin:0 auto; padding:16px; }
   .overlay-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
   .overlay-close{ border:none; background:var(--paper); border-radius:8px; padding:6px 11px; font-size:16px; cursor:pointer; }
@@ -399,27 +400,38 @@
 
 <div id="dashboardOverlay" class="overlay">
   <div class="overlay-inner">
-    <div class="card" style="margin-top:20px;">
-      <div class="overlay-head">
+    <div class="card" style="margin-top:20px; margin-bottom:10px;">
+      <div class="overlay-head" style="margin-bottom:0;">
         <div class="ledger-title" style="margin:0;" id="dashDate">Today</div>
         <button id="dashCloseBtn" class="overlay-close">✕</button>
       </div>
+    </div>
 
+    <div class="card">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1px; color:var(--udhaar); text-transform:uppercase; margin-bottom:8px;">Sales Today</div>
       <div class="mini-stats" style="margin-bottom:10px;">
-        <div><span class="lbl">Udhaar Today</span><span class="val" id="dashUdhaar">₹0</span></div>
-        <div><span class="lbl">Cash Today</span><span class="val" id="dashCash">₹0</span></div>
-        <div><span class="lbl">UPI Today</span><span class="val" id="dashUpi">₹0</span></div>
+        <div><span class="lbl">Udhaar</span><span class="val" id="dashUdhaar">₹0</span></div>
+        <div><span class="lbl">Cash</span><span class="val" id="dashCash">₹0</span></div>
+        <div><span class="lbl">UPI</span><span class="val" id="dashUpi">₹0</span></div>
       </div>
-
-      <div class="balance-label">Total Collected Today</div>
+      <div class="balance-label">Total Collected</div>
       <div class="balance-value zero" id="dashCollected">₹0</div>
-
-      <div class="balance-label">Today's Profit</div>
+      <div class="balance-label" style="margin-top:10px;">Profit</div>
       <div class="balance-value zero" id="dashProfit">₹0</div>
-      <div id="dashProfitBreakup" style="font-size:12px; color:var(--ink-soft); margin:-6px 0 8px;"></div>
+      <div id="dashProfitBreakup" style="font-size:12px; color:var(--ink-soft); margin:-6px 0 0;"></div>
+    </div>
 
-      <div class="ledger-title" style="font-size:14px; margin-top:16px;">Closing Balance — Each Party</div>
-      <table id="closingTable" style="width:100%; border-collapse:collapse; font-size:12.5px; margin-top:6px;">
+    <div class="card">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1px; color:var(--jama); text-transform:uppercase; margin-bottom:8px;">Purchases Today</div>
+      <div class="mini-stats">
+        <div><span class="lbl">Stock Received (Bill)</span><span class="val" id="dashStockBill">₹0</span></div>
+        <div><span class="lbl">Paid to Company</span><span class="val" id="dashCompanyPaid">₹0</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1px; color:var(--ink-soft); text-transform:uppercase; margin-bottom:8px;">Party Balances</div>
+      <table id="closingTable" style="width:100%; border-collapse:collapse; font-size:12.5px;">
         <thead>
           <tr style="border-bottom:1.5px solid var(--paper-line);">
             <th style="text-align:left; padding:6px 4px; color:var(--ink-soft); font-weight:600;">Party</th>
@@ -436,8 +448,15 @@
       <div class="balance-value" id="dashOutstanding">₹0</div>
 
       <button class="share-btn" id="shareClosingBtn" style="background:#25D366;">📲 Share Closing Balance</button>
+    </div>
 
-      <div class="ledger-title" style="font-size:14px; margin-top:16px;">Today's Entries</div>
+    <div class="card">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1px; color:var(--ink-soft); text-transform:uppercase; margin-bottom:8px;">Company Balance (You Owe)</div>
+      <div class="balance-value" id="dashCompanyBalance">₹0</div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1px; color:var(--ink-soft); text-transform:uppercase; margin-bottom:8px;">Today's Activity</div>
       <div id="dashEntries"></div>
     </div>
   </div>
@@ -519,20 +538,97 @@
         <button class="submit-btn" id="addProductSaveBtn" style="margin-top:12px;">Save Product</button>
       </div>
 
-      <div class="ledger-title" style="font-size:14px; margin-top:18px;">Stock Received</div>
+      <div class="ledger-title" style="font-size:14px; margin-top:18px;">Company Account</div>
+      <div class="mini-stats" style="margin-bottom:10px;">
+        <div><span class="lbl">Total Bill</span><span class="val" id="companyBillTotal">₹0</span></div>
+        <div><span class="lbl">Paid</span><span class="val" id="companyPaidTotal">₹0</span></div>
+        <div><span class="lbl">Balance Due</span><span class="val" id="companyBalanceTotal">₹0</span></div>
+      </div>
+      <button id="companyDateWiseBtn" style="width:100%; padding:9px; border-radius:9px; border:1.5px dashed var(--jama); background:transparent; color:var(--jama); font-weight:600; font-size:12.5px; margin-bottom:16px; cursor:pointer;">📅 Date-wise Purchase Ledger</button>
+
+      <div class="ledger-title" style="font-size:14px;">Record Stock Received</div>
       <label>Product</label>
       <select id="stockProductSelect"></select>
       <div class="row2">
         <div>
+          <label>Quantity Ordered</label>
+          <input type="number" id="stockQtyOrderedInput" placeholder="e.g. 20" min="0">
+        </div>
+        <div>
           <label>Quantity Received</label>
-          <input type="number" id="stockQtyInput" placeholder="e.g. 20" min="1">
+          <input type="number" id="stockQtyReceivedInput" placeholder="e.g. 20" min="0">
+        </div>
+      </div>
+      <div id="qtyMismatchNote" style="display:none; font-size:11.5px; color:var(--udhaar); margin-top:4px;"></div>
+      <div class="row2">
+        <div>
+          <label>Bill Amount</label>
+          <input type="number" id="stockBillInput" placeholder="₹0" min="0">
         </div>
         <div>
           <label>Date</label>
           <input type="date" id="stockDateInput">
         </div>
       </div>
+      <div class="settings-toggle" id="stockPaidToggle" style="margin-top:8px;">+ record payment made now</div>
+      <div id="stockPaidFields" style="display:none; margin-top:6px;">
+        <label>Amount Paid Now</label>
+        <input type="number" id="stockPaidNowInput" placeholder="₹0" min="0">
+        <label>Mode</label>
+        <div class="segmented">
+          <button class="stock-mode-btn active jama" data-mode="Cash">Cash</button>
+          <button class="stock-mode-btn jama" data-mode="UPI">UPI</button>
+        </div>
+      </div>
       <button class="submit-btn" id="addStockBtn" style="margin-top:12px; background:var(--jama);">Add to Stock</button>
+
+      <div style="border-top:1px dashed var(--paper-line); margin-top:20px; padding-top:14px;">
+        <div class="ledger-title" style="font-size:14px;">Pay Company (no stock)</div>
+        <div class="row2">
+          <div>
+            <label>Amount</label>
+            <input type="number" id="companyPayAmount" placeholder="₹0" min="0">
+          </div>
+          <div>
+            <label>Mode</label>
+            <div class="segmented">
+              <button class="pay-mode-btn active jama" data-mode="Cash">Cash</button>
+              <button class="pay-mode-btn jama" data-mode="UPI">UPI</button>
+            </div>
+          </div>
+        </div>
+        <button class="submit-btn" id="companyPayBtn" style="margin-top:12px; background:var(--ink);">Record Payment to Company</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="companyDateOverlay" class="overlay top stacked">
+  <div class="overlay-inner">
+    <div class="card" style="margin-top:20px;">
+      <div class="overlay-head">
+        <div class="ledger-title" style="margin:0;">Company Purchase Ledger</div>
+        <button id="companyDateCloseBtn" class="overlay-close">✕</button>
+      </div>
+      <div id="companyDateGroupList"></div>
+    </div>
+  </div>
+</div>
+
+<div id="editStockOverlay" class="overlay top stacked">
+  <div class="overlay-inner">
+    <div class="card" style="margin-top:20px;">
+      <div class="overlay-head">
+        <div class="ledger-title" style="margin:0;">Edit Stock Entry</div>
+        <button id="editStockCloseBtn" class="overlay-close">✕</button>
+      </div>
+      <label>Quantity Ordered</label>
+      <input type="number" id="editStockOrdered" min="0">
+      <label>Quantity Received</label>
+      <input type="number" id="editStockReceived" min="0">
+      <label>Bill Amount</label>
+      <input type="number" id="editStockBill" min="0">
+      <button class="submit-btn" id="editStockSaveBtn" style="margin-top:16px;">Save Changes</button>
     </div>
   </div>
 </div>
@@ -549,6 +645,26 @@
         Save a copy of all your parties, products, stock and entries as a file. Keep it somewhere safe (Google Drive, email to yourself, WhatsApp) — if this device's storage is ever cleared, you can restore everything from this file.
       </p>
 
+      <div style="border:1px solid var(--paper-line); border-radius:12px; padding:14px; margin-bottom:18px; background:var(--card);">
+        <div class="ledger-title" style="font-size:14px; margin-bottom:8px;">☁️ Account &amp; Cloud Sync</div>
+        <div id="cloudSignedOut">
+          <input id="cloudEmail" type="email" placeholder="Email" style="width:100%; padding:11px; margin-bottom:8px; border:1px solid var(--paper-line); border-radius:9px;">
+          <input id="cloudPassword" type="password" placeholder="Password" style="width:100%; padding:11px; margin-bottom:8px; border:1px solid var(--paper-line); border-radius:9px;">
+          <div style="display:flex; gap:8px;">
+            <button id="cloudLoginBtn" class="submit-btn" style="margin:0; flex:1;">Log in</button>
+            <button id="cloudSignupBtn" class="submit-btn" style="margin:0; flex:1; background:var(--jama);">Create account</button>
+          </div>
+        </div>
+        <div id="cloudSignedIn" style="display:none;">
+          <div id="cloudAccountText" style="font-size:12.5px; color:var(--ink-soft); margin-bottom:10px;"></div>
+          <div style="display:flex; gap:8px;">
+            <button id="cloudSyncBtn" class="submit-btn" style="margin:0; flex:1;">Sync now</button>
+            <button id="cloudLogoutBtn" class="submit-btn" style="margin:0; width:auto; background:var(--ink-soft);">Log out</button>
+          </div>
+        </div>
+        <div id="cloudStatus" style="font-size:12.5px; font-weight:600; margin-top:9px; color:var(--jama);"></div>
+      </div>
+
       <button class="submit-btn" id="downloadBackupBtn" style="margin-bottom:18px;">⬇️ Download Backup</button>
 
       <div style="border-top:1px dashed var(--paper-line); padding-top:16px;">
@@ -564,6 +680,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script crossorigin src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
 <script>
 const DEFAULT_META = {
@@ -586,8 +703,22 @@ let activeType = "Purchase";
 let activeMode = "Cash";
 let storageOK = true;
 let editingProductId = null;
+let localUpdatedAt = null;
 
-const OVERLAY_IDS = ['dashboardOverlay','dateOverlay','addPartyOverlay','stockOverlay','backupOverlay'];
+const SUPABASE_URL = "https://bwxoakbvoewmnwpqksus.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_VixIr4-U9DeYcrETNqBJwg_N5LFcQj4";
+let dairySupabase = null;
+let cloudSession = null;
+let cloudSyncBusy = false;
+
+function getDairySupabase(){
+  if(dairySupabase) return dairySupabase;
+  if(!window.supabase || !window.supabase.createClient) return null;
+  dairySupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  return dairySupabase;
+}
+
+const OVERLAY_IDS = ['dashboardOverlay','dateOverlay','addPartyOverlay','stockOverlay','backupOverlay','companyDateOverlay','editStockOverlay'];
 function closeAllOverlays(){
   OVERLAY_IDS.forEach(id=>{
     const el = document.getElementById(id);
@@ -606,27 +737,57 @@ function showStorageBanner(msg){
 function hideStorageBanner(){
   document.getElementById('storageBanner').style.display = 'none';
 }
-function testStorage(){
+
+// ---------- IndexedDB storage (much higher capacity than localStorage) ----------
+const IDB_NAME = "shriram-dairy-db";
+const IDB_STORE = "kv";
+function idbOpen() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = () => { req.result.createObjectStore(IDB_STORE); };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function idbGet(key) {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, "readonly");
+    const req = tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function idbSet(key, value) {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, "readwrite");
+    tx.objectStore(IDB_STORE).put(value, key);
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function testStorage(){
   try{
-    localStorage.setItem('verka-test', '1');
-    localStorage.removeItem('verka-test');
+    await idbSet('verka-test', '1');
     return true;
   }catch(e){
     return false;
   }
 }
 
-function lsGet(key){
-  const v = localStorage.getItem(key);
-  if(v === null) throw new Error('not found');
+async function lsGet(key){
+  const v = await idbGet(key);
+  if(v === undefined || v === null) throw new Error('not found');
   return v;
 }
-function lsSet(key, value){
-  localStorage.setItem(key, value);
+async function lsSet(key, value){
+  await idbSet(key, value);
 }
 
 async function loadData(){
-  if(typeof localStorage === 'undefined'){
+  if(typeof indexedDB === 'undefined'){
     storageOK = false;
     meta = DEFAULT_META;
     entries = [];
@@ -635,7 +796,7 @@ async function loadData(){
   }
 
   try{
-    meta = JSON.parse(lsGet('verka-meta'));
+    meta = JSON.parse(await lsGet('verka-meta'));
   }catch(e){
     try{
       const old = await window.storage.get('verka-meta', false);
@@ -643,11 +804,11 @@ async function loadData(){
     }catch(e2){
       meta = DEFAULT_META;
     }
-    try{ lsSet('verka-meta', JSON.stringify(meta)); }catch(e3){ storageOK = false; }
+    try{ await lsSet('verka-meta', JSON.stringify(meta)); }catch(e3){ storageOK = false; }
   }
 
   try{
-    entries = JSON.parse(lsGet('verka-entries'));
+    entries = JSON.parse(await lsGet('verka-entries'));
   }catch(e){
     try{
       const old = await window.storage.get('verka-entries', false);
@@ -655,8 +816,10 @@ async function loadData(){
     }catch(e2){
       entries = [];
     }
-    try{ lsSet('verka-entries', JSON.stringify(entries)); }catch(e3){ storageOK = false; }
+    try{ await lsSet('verka-entries', JSON.stringify(entries)); }catch(e3){ storageOK = false; }
   }
+
+  try{ localUpdatedAt = await lsGet('verka-updated-at'); }catch(e){ localUpdatedAt = null; }
 
   if(!meta.products || meta.products.length===0){
     meta.products = JSON.parse(JSON.stringify(DEFAULT_META.products));
@@ -671,10 +834,109 @@ async function loadData(){
 }
 
 async function saveMeta(){
-  lsSet('verka-meta', JSON.stringify(meta));
+  await lsSet('verka-meta', JSON.stringify(meta));
+  await markLocalUpdated();
 }
 async function saveEntries(){
-  lsSet('verka-entries', JSON.stringify(entries));
+  await lsSet('verka-entries', JSON.stringify(entries));
+  await markLocalUpdated();
+}
+async function markLocalUpdated(){
+  localUpdatedAt = new Date().toISOString();
+  await lsSet('verka-updated-at', localUpdatedAt);
+}
+
+function dairyLooksEmpty(data){
+  if(!data) return true;
+  const partyCount = data.meta && Array.isArray(data.meta.parties) ? data.meta.parties.length : 0;
+  const entryCount = Array.isArray(data.entries) ? data.entries.length : 0;
+  return partyCount === 0 && entryCount === 0;
+}
+
+function mergeById(first, second){
+  const map = new Map();
+  for(const item of [...(first || []), ...(second || [])]){
+    const key = item && item.id ? item.id : JSON.stringify(item);
+    map.set(key, item);
+  }
+  return [...map.values()];
+}
+
+function mergeDairyCopies(localData, cloudData){
+  const localTime = localData.updatedAt ? new Date(localData.updatedAt).getTime() : 0;
+  const cloudTime = cloudData.updatedAt ? new Date(cloudData.updatedAt).getTime() : 0;
+  const newer = cloudTime > localTime ? cloudData : localData;
+  const older = cloudTime > localTime ? localData : cloudData;
+  return {
+    meta: {
+      ...(older.meta || {}),
+      ...(newer.meta || {}),
+      parties: mergeById((older.meta && older.meta.parties) || [], (newer.meta && newer.meta.parties) || []),
+      products: mergeById((older.meta && older.meta.products) || [], (newer.meta && newer.meta.products) || []),
+    },
+    entries: mergeById(older.entries || [], newer.entries || []),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function setCloudStatus(message, isError=false){
+  const el = document.getElementById('cloudStatus');
+  if(!el) return;
+  el.textContent = message || '';
+  el.style.color = isError ? 'var(--udhaar)' : 'var(--jama)';
+}
+
+function renderCloudAccount(){
+  const out = document.getElementById('cloudSignedOut');
+  const inside = document.getElementById('cloudSignedIn');
+  if(!out || !inside) return;
+  out.style.display = cloudSession ? 'none' : 'block';
+  inside.style.display = cloudSession ? 'block' : 'none';
+  if(cloudSession) document.getElementById('cloudAccountText').textContent = 'Logged in as ' + cloudSession.user.email;
+}
+
+async function initCloud(){
+  const sb = getDairySupabase();
+  if(!sb){ setCloudStatus('Cloud library could not load. Check the internet connection.', true); return; }
+  const { data } = await sb.auth.getSession();
+  cloudSession = data.session || null;
+  renderCloudAccount();
+  sb.auth.onAuthStateChange((_event, session)=>{ cloudSession = session; renderCloudAccount(); });
+}
+
+async function syncDairyNow(){
+  if(cloudSyncBusy || !cloudSession) return;
+  cloudSyncBusy = true;
+  const btn = document.getElementById('cloudSyncBtn');
+  btn.disabled = true; btn.textContent = 'Syncing…';
+  setCloudStatus('Syncing safely…');
+  try{
+    const sb = getDairySupabase();
+    const userId = cloudSession.user.id;
+    const localData = { meta, entries, updatedAt: localUpdatedAt };
+    const { data: row, error: readError } = await sb.from('dairy_backups').select('data, updated_at').eq('user_id', userId).maybeSingle();
+    if(readError) throw readError;
+    let merged = localData;
+    if(row && row.data){
+      merged = mergeDairyCopies(localData, { ...row.data, updatedAt: row.data.updatedAt || row.updated_at });
+    }
+    if(dairyLooksEmpty(merged) && row && row.data && !dairyLooksEmpty(row.data)) throw new Error('Sync blocked to protect existing cloud data');
+    const { error: writeError } = await sb.from('dairy_backups').upsert({ user_id:userId, data:merged, updated_at:merged.updatedAt }, { onConflict:'user_id' });
+    if(writeError) throw writeError;
+    meta = merged.meta;
+    entries = merged.entries;
+    localUpdatedAt = merged.updatedAt;
+    await lsSet('verka-meta', JSON.stringify(meta));
+    await lsSet('verka-entries', JSON.stringify(entries));
+    await lsSet('verka-updated-at', localUpdatedAt);
+    renderAll();
+    setCloudStatus(`Synced — ${meta.parties.length} parties and ${entries.length} entries.`);
+  }catch(error){
+    setCloudStatus('Sync failed: ' + (error && error.message ? error.message : 'unknown error'), true);
+  }finally{
+    cloudSyncBusy = false;
+    btn.disabled = false; btn.textContent = 'Sync now';
+  }
 }
 
 function fmt(n){
@@ -820,26 +1082,25 @@ function waLink(phone, text){
   return `https://wa.me/?text=${encoded}`;
 }
 
-function billMessage(entry, party){
+function todayLedgerMessage(party){
   const t = computeTotals(party.id);
-  const desc = entry.type==='Purchase'
-    ? `${entry.product} x ${entry.qty} = ${fmt(entry.amount)} (Purchase)`
-    : `Payment received: ${fmt(entry.amount)} (${entry.mode})`;
-  const prevLine = t.opening ? `Previous Balance: ${fmt(t.opening)}\n` : '';
-  return `🥛 *${party.name} — Daily Bill*\n` +
-         `Date: ${niceDate(entry.date)}\n\n` +
-         `${prevLine}${desc}\n\n` +
-         `*Baaki (Balance Due): ${fmt(t.baaki)}*\n\n` +
-         `— Sent via Shriram Dairy`;
-}
+  const today = todayISO();
+  const todayEntries = entries.filter(e=>e.partyId===party.id && e.date===today).sort((a,b)=>a.ts-b.ts);
 
-function balanceMessage(party){
-  const t = computeTotals(party.id);
-  const prevLine = t.opening ? `Previous Balance: ${fmt(t.opening)}\n` : '';
-  return `🥛 *${party.name} — Balance Update*\n` +
-         `${prevLine}Total Purchase: ${fmt(t.udhaar)}\n` +
-         `Received (Cash): ${fmt(t.cash)}\n` +
-         `Received (UPI): ${fmt(t.upi)}\n\n` +
+  let lines;
+  if(todayEntries.length===0){
+    lines = 'No transactions today.';
+  } else {
+    lines = todayEntries.map(e=>{
+      return e.type==='Purchase'
+        ? `${e.product} x ${e.qty} = ${fmt(e.amount)} (Purchase)`
+        : `Payment received: ${fmt(e.amount)} (${e.mode})`;
+    }).join('\n');
+  }
+
+  return `🥛 *${party.name} — Today's Ledger*\n` +
+         `Date: ${niceDate(today)}\n\n` +
+         `${lines}\n\n` +
          `*Baaki (Balance Due): ${fmt(t.baaki)}*\n\n` +
          `— Sent via Shriram Dairy`;
 }
@@ -937,9 +1198,7 @@ document.getElementById('submitBtn').addEventListener('click', async ()=>{
 
 document.getElementById('shareBalanceBtn').addEventListener('click', ()=>{
   const party = partyById(activePartyId);
-  const msg = window._lastEntryForShare && window._lastEntryForShare.partyId===activePartyId
-    ? billMessage(window._lastEntryForShare, party)
-    : balanceMessage(party);
+  const msg = todayLedgerMessage(party);
   window.open(waLink(party.phone, msg), '_blank');
 });
 
@@ -949,17 +1208,18 @@ async function deleteEntry(id){
   const e = entries[idx];
 
   if(e.type==='StockIn'){
-    if(!confirm(`Delete this stock entry?\n\n${e.product} × ${e.qty} received\n\nThis will subtract it back out of stock. Cannot be undone.`)) return;
+    const n = normalizeStockEntry(e);
+    if(!confirm(`Delete this stock entry?\n\n${e.product} × ${n.qtyReceived} received (Bill: ${fmt(n.billAmount)})\n\nThis will subtract it back out of stock. Cannot be undone.`)) return;
     const removed = entries.splice(idx, 1)[0];
     const prod = productByName(removed.product);
-    if(prod) prod.stock = (prod.stock||0) - removed.qty;
+    if(prod) prod.stock = (prod.stock||0) - n.qtyReceived;
     if(storageOK){
       try{
         await saveEntries();
         await saveMeta();
       }catch(err){
         entries.splice(idx, 0, removed);
-        if(prod) prod.stock = (prod.stock||0) + removed.qty;
+        if(prod) prod.stock = (prod.stock||0) + n.qtyReceived;
         showToast('⚠️ Could not delete — try again.');
         return;
       }
@@ -967,7 +1227,27 @@ async function deleteEntry(id){
     renderAll();
     if(document.getElementById('dashboardOverlay').style.display === 'block') renderDashboard();
     if(document.getElementById('stockOverlay').style.display === 'block') renderProductsOverlay();
+    if(document.getElementById('companyDateOverlay').style.display === 'block') renderCompanyDateWise();
     showToast('Stock entry deleted 🗑️');
+    return;
+  }
+
+  if(e.type==='CompanyPayment'){
+    if(!confirm(`Delete this payment?\n\n${fmt(e.amount)} (${e.mode}) paid to company\n\nThis cannot be undone.`)) return;
+    const removed = entries.splice(idx, 1)[0];
+    if(storageOK){
+      try{
+        await saveEntries();
+      }catch(err){
+        entries.splice(idx, 0, removed);
+        showToast('⚠️ Could not delete — try again.');
+        return;
+      }
+    }
+    if(document.getElementById('dashboardOverlay').style.display === 'block') renderDashboard();
+    if(document.getElementById('stockOverlay').style.display === 'block') renderProductsOverlay();
+    if(document.getElementById('companyDateOverlay').style.display === 'block') renderCompanyDateWise();
+    showToast('Payment entry deleted 🗑️');
     return;
   }
 
@@ -1074,15 +1354,39 @@ function renderDashboard(){
   document.getElementById('dashOutstanding').textContent = fmt(totalOutstanding);
   window._lastClosingData = closingData;
 
+  let stockBillToday = 0, companyPaidToday = 0;
+  todayEntries.forEach(e=>{
+    if(e.type==='StockIn'){
+      const n = normalizeStockEntry(e);
+      stockBillToday += n.billAmount;
+      companyPaidToday += n.paidNow;
+    } else if(e.type==='CompanyPayment'){
+      companyPaidToday += e.amount;
+    }
+  });
+  document.getElementById('dashStockBill').textContent = fmt(stockBillToday);
+  document.getElementById('dashCompanyPaid').textContent = fmt(companyPaidToday);
+  document.getElementById('dashCompanyBalance').textContent = fmt(computeCompanyTotals().balance);
+
   const listEl = document.getElementById('dashEntries');
   if(todayEntries.length===0){
     listEl.innerHTML = '<div class="empty">No entries yet today.</div>';
   } else {
     listEl.innerHTML = todayEntries.map(e=>{
       if(e.type==='StockIn'){
-        return `<div class="entry"><div class="desc">📦 Stock received: ${e.product} × ${e.qty}</div>
+        const n = normalizeStockEntry(e);
+        const mismatch = n.qtyOrdered !== n.qtyReceived ? ' ⚠️' : '';
+        return `<div class="entry"><div class="desc">📦 Stock: ${e.product} × ${n.qtyReceived}${mismatch}<span class="d">Bill: ${fmt(n.billAmount)}</span></div>
           <div style="display:flex; align-items:center; gap:8px;">
-            <div class="amt jama">+${e.qty}</div>
+            <div class="amt udhaar">+${fmt(n.billAmount)}</div>
+            <button onclick="deleteEntry('${e.id}')" style="border:none; background:transparent; color:var(--ink-soft); font-size:15px; cursor:pointer; padding:2px 4px;">🗑️</button>
+          </div>
+        </div>`;
+      }
+      if(e.type==='CompanyPayment'){
+        return `<div class="entry"><div class="desc">🏭 Paid to company (${e.mode})</div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div class="amt jama">−${fmt(e.amount)}</div>
             <button onclick="deleteEntry('${e.id}')" style="border:none; background:transparent; color:var(--ink-soft); font-size:15px; cursor:pointer; padding:2px 4px;">🗑️</button>
           </div>
         </div>`;
@@ -1120,7 +1424,7 @@ document.getElementById('shareClosingBtn').addEventListener('click', ()=>{
 
 document.getElementById('storageDismissBtn').addEventListener('click', hideStorageBanner);
 document.getElementById('storageRetryBtn').addEventListener('click', async ()=>{
-  if(testStorage()){
+  if(await testStorage()){
     storageOK = true;
     hideStorageBanner();
     try{ await saveMeta(); await saveEntries(); }catch(e){}
@@ -1247,6 +1551,11 @@ function renderProductsOverlay(){
   }).join('');
   document.getElementById('stockValueTotal').textContent = fmt(totalValue);
   renderProductOptions();
+
+  const ct = computeCompanyTotals();
+  document.getElementById('companyBillTotal').textContent = fmt(ct.billTotal);
+  document.getElementById('companyPaidTotal').textContent = fmt(ct.paidTotal);
+  document.getElementById('companyBalanceTotal').textContent = fmt(ct.balance);
 }
 
 function resetProductForm(){
@@ -1327,6 +1636,32 @@ document.getElementById('addProductSaveBtn').addEventListener('click', async ()=
   renderProductsOverlay();
 });
 
+function normalizeStockEntry(e){
+  const qtyReceived = e.qtyReceived !== undefined ? e.qtyReceived : e.qty;
+  const qtyOrdered = e.qtyOrdered !== undefined ? e.qtyOrdered : qtyReceived;
+  let billAmount = e.billAmount;
+  if(billAmount === undefined || billAmount === null){
+    const p = productByName(e.product);
+    billAmount = qtyReceived * (p ? p.costPrice : 0);
+  }
+  const paidNow = e.paidNow || 0;
+  return { qtyOrdered, qtyReceived, billAmount, paidNow, mode: e.mode };
+}
+
+function computeCompanyTotals(){
+  let billTotal = 0, paidTotal = 0;
+  entries.forEach(e=>{
+    if(e.type==='StockIn'){
+      const n = normalizeStockEntry(e);
+      billTotal += n.billAmount;
+      paidTotal += n.paidNow;
+    } else if(e.type==='CompanyPayment'){
+      paidTotal += e.amount;
+    }
+  });
+  return { billTotal, paidTotal, balance: billTotal - paidTotal };
+}
+
 document.getElementById('stockBtn').addEventListener('click', ()=>{
   document.getElementById('stockDateInput').value = todayISO();
   renderProductsOverlay();
@@ -1336,30 +1671,224 @@ document.getElementById('stockCloseBtn').addEventListener('click', ()=>{
   document.getElementById('stockOverlay').style.display = 'none';
 });
 
+let stockMode = 'Cash';
+document.querySelectorAll('.stock-mode-btn').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    stockMode = b.dataset.mode;
+    document.querySelectorAll('.stock-mode-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+  });
+});
+let payMode = 'Cash';
+document.querySelectorAll('.pay-mode-btn').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    payMode = b.dataset.mode;
+    document.querySelectorAll('.pay-mode-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+  });
+});
+
+document.getElementById('stockPaidToggle').addEventListener('click', ()=>{
+  const el = document.getElementById('stockPaidFields');
+  el.style.display = el.style.display==='none' ? 'block' : 'none';
+});
+
+function autoFillStockAmounts(){
+  const productName = document.getElementById('stockProductSelect').value;
+  const p = productByName(productName);
+  const ordered = parseFloat(document.getElementById('stockQtyOrderedInput').value);
+  const receivedField = document.getElementById('stockQtyReceivedInput');
+  if(ordered && !receivedField.value){
+    receivedField.value = ordered;
+  }
+  const received = parseFloat(receivedField.value);
+  if(p && received){
+    document.getElementById('stockBillInput').value = (p.costPrice * received).toFixed(0);
+  }
+  const note = document.getElementById('qtyMismatchNote');
+  if(ordered && received && ordered !== received){
+    note.style.display = 'block';
+    note.textContent = received < ordered
+      ? `⚠️ Received ${ordered - received} less than ordered`
+      : `⚠️ Received ${received - ordered} more than ordered`;
+  } else {
+    note.style.display = 'none';
+  }
+}
+document.getElementById('stockQtyOrderedInput').addEventListener('input', autoFillStockAmounts);
+document.getElementById('stockQtyReceivedInput').addEventListener('input', autoFillStockAmounts);
+document.getElementById('stockProductSelect').addEventListener('change', autoFillStockAmounts);
+
 document.getElementById('addStockBtn').addEventListener('click', async ()=>{
   const productName = document.getElementById('stockProductSelect').value;
-  const qty = parseFloat(document.getElementById('stockQtyInput').value);
+  const qtyOrdered = parseFloat(document.getElementById('stockQtyOrderedInput').value) || 0;
+  const qtyReceived = parseFloat(document.getElementById('stockQtyReceivedInput').value);
+  const billAmount = parseFloat(document.getElementById('stockBillInput').value) || 0;
   const date = document.getElementById('stockDateInput').value || todayISO();
-  if(!qty || qty<=0){ showToast('Enter a valid quantity received'); return; }
+  const paidFieldsShown = document.getElementById('stockPaidFields').style.display !== 'none';
+  const paidNow = paidFieldsShown ? (parseFloat(document.getElementById('stockPaidNowInput').value) || 0) : 0;
+
+  if(!qtyReceived || qtyReceived<=0){ showToast('Enter a valid quantity received'); return; }
   const p = productByName(productName);
   if(!p){ showToast('Select a product'); return; }
 
-  p.stock = (p.stock||0) + qty;
-  const stockEntry = { id:'e'+Date.now(), ts:Date.now(), partyId:null, date, type:'StockIn', product:productName, qty };
+  p.stock = (p.stock||0) + qtyReceived;
+  const stockEntry = {
+    id:'e'+Date.now(), ts:Date.now(), partyId:null, date, type:'StockIn', product:productName,
+    qty: qtyReceived, qtyOrdered: qtyOrdered || qtyReceived, qtyReceived, billAmount,
+    paidNow, mode: paidNow>0 ? stockMode : undefined
+  };
   entries.push(stockEntry);
 
   try{
     await saveMeta();
     await saveEntries();
   }catch(e){
-    p.stock = (p.stock||0) - qty;
+    p.stock = (p.stock||0) - qtyReceived;
     entries.pop();
     showToast('⚠️ Could not save — try again.');
     return;
   }
-  document.getElementById('stockQtyInput').value = '';
+  document.getElementById('stockQtyOrderedInput').value = '';
+  document.getElementById('stockQtyReceivedInput').value = '';
+  document.getElementById('stockBillInput').value = '';
+  document.getElementById('stockPaidNowInput').value = '';
+  document.getElementById('qtyMismatchNote').style.display = 'none';
   renderProductsOverlay();
-  showToast(`Added ${qty} to ${p.name}'s stock ✅`);
+  showToast(`Added ${qtyReceived} to ${p.name}'s stock ✅`);
+});
+
+document.getElementById('companyPayBtn').addEventListener('click', async ()=>{
+  const amount = parseFloat(document.getElementById('companyPayAmount').value);
+  if(!amount || amount<=0){ showToast('Enter a valid amount'); return; }
+  const entry = { id:'e'+Date.now(), ts:Date.now(), partyId:null, date: todayISO(), type:'CompanyPayment', amount, mode: payMode };
+  entries.push(entry);
+  try{
+    await saveEntries();
+  }catch(e){
+    entries.pop();
+    showToast('⚠️ Could not save — try again.');
+    return;
+  }
+  document.getElementById('companyPayAmount').value = '';
+  renderProductsOverlay();
+  showToast('Payment to company recorded ✅');
+});
+
+function renderCompanyDateWise(){
+  const list = entries.filter(e=>e.type==='StockIn' || e.type==='CompanyPayment').sort((a,b)=> new Date(a.date) - new Date(b.date) || a.ts - b.ts);
+  const wrap = document.getElementById('companyDateGroupList');
+  if(list.length===0){
+    wrap.innerHTML = '<div class="empty">No stock or payments recorded yet.</div>';
+    return;
+  }
+
+  let running = 0;
+  const byDate = {};
+  list.forEach(e=>{
+    if(e.type==='StockIn'){
+      const n = normalizeStockEntry(e);
+      running += n.billAmount - n.paidNow;
+    } else {
+      running -= e.amount;
+    }
+    if(!byDate[e.date]) byDate[e.date] = { entries: [], balance: 0 };
+    byDate[e.date].entries.push(e);
+    byDate[e.date].balance = running;
+  });
+
+  const dates = Object.keys(byDate).sort((a,b)=> new Date(b) - new Date(a));
+  wrap.innerHTML = dates.map(d=>{
+    const g = byDate[d];
+    const safeId = 'cdg-' + d;
+    const rows = g.entries.map(e=>{
+      if(e.type==='StockIn'){
+        const n = normalizeStockEntry(e);
+        const mismatch = n.qtyOrdered !== n.qtyReceived ? ` <span style="color:var(--udhaar);">(ordered ${n.qtyOrdered})</span>` : '';
+        const paidNote = n.paidNow > 0 ? ` · paid ${fmt(n.paidNow)}` : '';
+        return `<div class="entry">
+          <div class="desc">${e.product} × ${n.qtyReceived}${mismatch}<span class="d">Bill: ${fmt(n.billAmount)}${paidNote}</span></div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div class="amt udhaar">+${fmt(n.billAmount)}</div>
+            <button onclick="editStockEntry('${e.id}')" style="border:none; background:transparent; font-size:14px; cursor:pointer; padding:2px;">✏️</button>
+            <button onclick="deleteEntry('${e.id}')" style="border:none; background:transparent; color:var(--ink-soft); font-size:15px; cursor:pointer; padding:2px 4px;">🗑️</button>
+          </div>
+        </div>`;
+      } else {
+        return `<div class="entry">
+          <div class="desc">Payment to company (${e.mode})</div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div class="amt jama">−${fmt(e.amount)}</div>
+            <button onclick="deleteEntry('${e.id}')" style="border:none; background:transparent; color:var(--ink-soft); font-size:15px; cursor:pointer; padding:2px 4px;">🗑️</button>
+          </div>
+        </div>`;
+      }
+    }).join('');
+
+    return `<div style="border-bottom:1px solid var(--paper-line);">
+      <div onclick="toggleDateGroup('${safeId}')" style="display:flex; justify-content:space-between; align-items:center; padding:12px 4px; cursor:pointer;">
+        <span style="font-weight:600; font-size:14px;">${niceDate(d)}</span>
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600;">Balance: ${fmt(g.balance)} ▾</span>
+      </div>
+      <div id="${safeId}" style="display:none; padding:0 4px 8px;">${rows}</div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('companyDateWiseBtn').addEventListener('click', ()=>{
+  renderCompanyDateWise();
+  document.getElementById('companyDateOverlay').style.display = 'block';
+});
+document.getElementById('companyDateCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('companyDateOverlay').style.display = 'none';
+});
+
+let editingStockEntryId = null;
+function editStockEntry(id){
+  const e = entries.find(x=>x.id===id);
+  if(!e || e.type!=='StockIn') return;
+  const n = normalizeStockEntry(e);
+  editingStockEntryId = id;
+  document.getElementById('editStockOrdered').value = n.qtyOrdered;
+  document.getElementById('editStockReceived').value = n.qtyReceived;
+  document.getElementById('editStockBill').value = n.billAmount;
+  document.getElementById('editStockOverlay').style.display = 'block';
+}
+window.editStockEntry = editStockEntry;
+
+document.getElementById('editStockCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('editStockOverlay').style.display = 'none';
+});
+
+document.getElementById('editStockSaveBtn').addEventListener('click', async ()=>{
+  const e = entries.find(x=>x.id===editingStockEntryId);
+  if(!e){ document.getElementById('editStockOverlay').style.display = 'none'; return; }
+  const newOrdered = parseFloat(document.getElementById('editStockOrdered').value) || 0;
+  const newReceived = parseFloat(document.getElementById('editStockReceived').value);
+  const newBill = parseFloat(document.getElementById('editStockBill').value) || 0;
+  if(!newReceived || newReceived<=0){ showToast('Enter a valid quantity received'); return; }
+
+  const oldReceived = normalizeStockEntry(e).qtyReceived;
+  const p = productByName(e.product);
+  const stockDelta = newReceived - oldReceived;
+
+  const before = { qty: e.qty, qtyOrdered: e.qtyOrdered, qtyReceived: e.qtyReceived, billAmount: e.billAmount };
+  e.qty = newReceived; e.qtyOrdered = newOrdered || newReceived; e.qtyReceived = newReceived; e.billAmount = newBill;
+  if(p) p.stock = (p.stock||0) + stockDelta;
+
+  try{
+    await saveEntries();
+    if(p) await saveMeta();
+  }catch(err){
+    Object.assign(e, before);
+    if(p) p.stock = (p.stock||0) - stockDelta;
+    showToast('⚠️ Could not save changes — try again.');
+    return;
+  }
+  document.getElementById('editStockOverlay').style.display = 'none';
+  renderProductsOverlay();
+  if(document.getElementById('companyDateOverlay').style.display === 'block') renderCompanyDateWise();
+  showToast('Stock entry updated ✅');
 });
 
 document.getElementById('backupBtn').addEventListener('click', ()=>{
@@ -1368,6 +1897,42 @@ document.getElementById('backupBtn').addEventListener('click', ()=>{
 document.getElementById('backupCloseBtn').addEventListener('click', ()=>{
   document.getElementById('backupOverlay').style.display = 'none';
 });
+
+document.getElementById('cloudLoginBtn').addEventListener('click', async ()=>{
+  const email = document.getElementById('cloudEmail').value.trim();
+  const password = document.getElementById('cloudPassword').value;
+  if(!email || !password){ setCloudStatus('Enter email and password.', true); return; }
+  setCloudStatus('Logging in…');
+  const sb = getDairySupabase();
+  if(!sb){ setCloudStatus('Cloud library could not load.', true); return; }
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  setCloudStatus(error ? 'Login failed: ' + error.message : 'Logged in. Press Sync now.', !!error);
+});
+
+document.getElementById('cloudSignupBtn').addEventListener('click', async ()=>{
+  const email = document.getElementById('cloudEmail').value.trim();
+  const password = document.getElementById('cloudPassword').value;
+  if(!email || password.length < 6){ setCloudStatus('Enter an email and a password of at least 6 characters.', true); return; }
+  setCloudStatus('Creating account…');
+  const sb = getDairySupabase();
+  if(!sb){ setCloudStatus('Cloud library could not load.', true); return; }
+  const { data, error } = await sb.auth.signUp({ email, password });
+  if(error){ setCloudStatus('Account creation failed: ' + error.message, true); return; }
+  setCloudStatus(data.session ? 'Account created. Press Sync now.' : 'Account created. Check your email to confirm, then log in.');
+});
+
+document.getElementById('cloudSyncBtn').addEventListener('click', syncDairyNow);
+document.getElementById('cloudLogoutBtn').addEventListener('click', async ()=>{
+  const sb = getDairySupabase();
+  if(sb) await sb.auth.signOut();
+  setCloudStatus('Logged out. Offline data remains on this device.');
+});
+
+function backupFilename(){
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return `Shriram_Dairy_Backup_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.json`;
+}
 
 document.getElementById('downloadBackupBtn').addEventListener('click', async ()=>{
   const backup = {
@@ -1378,30 +1943,38 @@ document.getElementById('downloadBackupBtn').addEventListener('click', async ()=
     entries: entries
   };
   const json = JSON.stringify(backup, null, 2);
-  const filename = 'Shriram_Dairy_Backup_' + todayISO() + '.json';
-  const blob = new Blob([json], { type: 'application/json' });
+  const filename = backupFilename();
 
-  // Android WebView ignores normal <a download> links. Prefer the Web Share API so the
-  // user can save the real JSON file to Files, Drive, WhatsApp, email, etc.
-  try{
-    const file = new File([blob], filename, { type: 'application/json' });
-    if(navigator.share && (!navigator.canShare || navigator.canShare({ files:[file] }))){
-      await navigator.share({ title:'Shriram Dairy Backup', text:'Shriram Dairy data backup', files:[file] });
-      showToast('Backup shared ✅');
+  const isNative = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+
+  if(isNative && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem){
+    let writeResult = null;
+    try{
+      const { Filesystem } = window.Capacitor.Plugins;
+      writeResult = await Filesystem.writeFile({
+        path: filename,
+        data: json,
+        directory: "CACHE",
+        encoding: "utf8"
+      });
+    }catch(e){
+      showToast('⚠️ Could not save backup: ' + (e && e.message ? e.message : 'unknown error'));
       return;
     }
-  }catch(err){
-    if(err && err.name === 'AbortError') return; // user closed the Android share sheet
+    try{
+      if(window.Capacitor.Plugins.Share){
+        await window.Capacitor.Plugins.Share.share({ title: 'Shriram Dairy Backup', url: writeResult.uri });
+      } else {
+        showToast('Backup saved ✅');
+      }
+    }catch(e){
+      showToast('Backup saved, but sharing failed: ' + (e && e.message ? e.message : 'unknown error'));
+    }
+    return;
   }
 
-  // Last-resort recovery: copy the JSON itself. This prevents data from being trapped even
-  // on older WebViews that support neither file downloads nor file sharing.
-  try{
-    await navigator.clipboard.writeText(json);
-    showToast('Backup copied — paste it into WhatsApp or a text file ✅');
-    return;
-  }catch(err){ /* continue to browser download below */ }
-
+  // Browser fallback (works fine testing on the website directly)
+  const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -1410,7 +1983,7 @@ document.getElementById('downloadBackupBtn').addEventListener('click', async ()=
   a.click();
   document.body.removeChild(a);
   setTimeout(()=>URL.revokeObjectURL(url), 2000);
-  showToast('Backup download requested — check Downloads');
+  showToast('Backup downloaded ✅');
 });
 
 document.getElementById('restoreBackupBtn').addEventListener('click', ()=>{
@@ -1503,6 +2076,7 @@ document.getElementById('exportBtn').addEventListener('click', exportToExcel);
   document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('en-IN', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
   await loadData();
   renderAll();
+  await initCloud();
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
     try{
