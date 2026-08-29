@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shriram-dairy-cache-v5';
+const CACHE_NAME = 'shriram-dairy-cache-v6';
 const ASSETS = [
   './index.html',
   './manifest.json',
