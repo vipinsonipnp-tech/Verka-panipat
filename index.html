@@ -1369,7 +1369,7 @@ document.getElementById('backupCloseBtn').addEventListener('click', ()=>{
   document.getElementById('backupOverlay').style.display = 'none';
 });
 
-document.getElementById('downloadBackupBtn').addEventListener('click', ()=>{
+document.getElementById('downloadBackupBtn').addEventListener('click', async ()=>{
   const backup = {
     app: 'Shriram Dairy',
     backupVersion: 1,
@@ -1377,16 +1377,40 @@ document.getElementById('downloadBackupBtn').addEventListener('click', ()=>{
     meta: meta,
     entries: entries
   };
-  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const json = JSON.stringify(backup, null, 2);
+  const filename = 'Shriram_Dairy_Backup_' + todayISO() + '.json';
+  const blob = new Blob([json], { type: 'application/json' });
+
+  // Android WebView ignores normal <a download> links. Prefer the Web Share API so the
+  // user can save the real JSON file to Files, Drive, WhatsApp, email, etc.
+  try{
+    const file = new File([blob], filename, { type: 'application/json' });
+    if(navigator.share && (!navigator.canShare || navigator.canShare({ files:[file] }))){
+      await navigator.share({ title:'Shriram Dairy Backup', text:'Shriram Dairy data backup', files:[file] });
+      showToast('Backup shared ✅');
+      return;
+    }
+  }catch(err){
+    if(err && err.name === 'AbortError') return; // user closed the Android share sheet
+  }
+
+  // Last-resort recovery: copy the JSON itself. This prevents data from being trapped even
+  // on older WebViews that support neither file downloads nor file sharing.
+  try{
+    await navigator.clipboard.writeText(json);
+    showToast('Backup copied — paste it into WhatsApp or a text file ✅');
+    return;
+  }catch(err){ /* continue to browser download below */ }
+
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'Shriram_Dairy_Backup_' + todayISO() + '.json';
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   setTimeout(()=>URL.revokeObjectURL(url), 2000);
-  showToast('Backup downloaded ✅');
+  showToast('Backup download requested — check Downloads');
 });
 
 document.getElementById('restoreBackupBtn').addEventListener('click', ()=>{
